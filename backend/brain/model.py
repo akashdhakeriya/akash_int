@@ -1,4 +1,4 @@
-from transformers import pipeline, GenerationConfig
+from transformers import pipeline
 
 
 class AkashAI:
@@ -9,26 +9,54 @@ class AkashAI:
             return_full_text=False
         )
 
-        self.generation_config = GenerationConfig(
-            max_new_tokens=150,
-            do_sample=False
-        )
+    def ask(self, question, knowledge=None):
 
-    def ask(self, question):
-        prompt = (
-            "You are Akash AI.\n"
-            "Answer the user's question clearly and accurately.\n"
-            "If the user asks in Hinglish, answer in natural simple Hinglish.\n"
-            "Do not invent facts.\n"
-            "Do not repeat the question.\n"
-            "Do not add greetings or closing messages.\n\n"
-            f"User: {question}\n"
-            "Answer:"
-        )
+        if knowledge:
+            prompt = f"""
+You are Akash AI.
+
+Use ONLY the information provided in the Knowledge section.
+
+Rules:
+- Answer in simple natural Hinglish.
+- Do not add facts that are not present in Knowledge.
+- Do not change numbers or technical facts from Knowledge.
+- Do not invent information.
+- If the answer is not present in Knowledge, say:
+"Mujhe is question ka answer meri current knowledge base mein nahi mila."
+- Keep the answer concise.
+- Do not repeat the question.
+- Do not add a closing message.
+
+Knowledge:
+{knowledge}
+
+User Question:
+{question}
+
+Answer:
+"""
+        else:
+            prompt = f"""
+You are Akash AI.
+
+Answer the user clearly and accurately.
+If the user writes in Hinglish, answer in simple natural Hinglish.
+Do not invent facts.
+Do not repeat the question.
+Do not add a closing message.
+
+User:
+{question}
+
+Answer:
+"""
 
         response = self.chatbot(
             prompt,
-            generation_config=self.generation_config
+            max_new_tokens=80,
+            do_sample=False,
+            return_full_text=False
         )
 
         return response[0]["generated_text"].strip()
