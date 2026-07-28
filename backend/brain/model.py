@@ -1,4 +1,4 @@
-from transformers import pipeline
+from transformers import pipeline, GenerationConfig
 
 
 class AkashAI:
@@ -9,13 +9,10 @@ class AkashAI:
             return_full_text=False
         )
 
-        # Model ki default generation settings ko clean karo
-        self.chatbot.model.generation_config.max_length = None
-        self.chatbot.model.generation_config.max_new_tokens = 150
-        self.chatbot.model.generation_config.do_sample = False
-        self.chatbot.model.generation_config.temperature = None
-        self.chatbot.model.generation_config.top_p = None
-        self.chatbot.model.generation_config.top_k = None
+        self.generation_config = GenerationConfig(
+            max_new_tokens=150,
+            do_sample=False
+        )
 
     def ask(self, question):
         prompt = (
@@ -29,6 +26,9 @@ class AkashAI:
             "Answer:"
         )
 
-        response = self.chatbot(prompt)
+        response = self.chatbot(
+            prompt,
+            generation_config=self.generation_config
+        )
 
         return response[0]["generated_text"].strip()
